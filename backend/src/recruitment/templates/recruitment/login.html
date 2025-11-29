@@ -1,0 +1,384 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Candidate Login – NCC Veteran Recruitment Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <style>
+        :root {
+            /* Light NCC parade palette */
+            --army-green-dark: #23422f;          /* header green */
+            --army-green: #23422f;
+            --army-green-soft: #e7efe6;         /* pale green */
+            --army-accent: #c49b4f;             /* khaki */
+            --army-accent-soft: rgba(196, 155, 79, 0.2);
+            --accent-red: #c62828;              /* plume red */
+            --text-light: #111512;              /* main text (dark) */
+            --muted: #5f6a5f;
+            --danger: #d64545;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background:#B9B195;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .camouflage {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.06;
+            background-image:
+                radial-gradient(circle at 15% 20%, #cfdac3 0, transparent 60%),
+                radial-gradient(circle at 80% 30%, #bac9b7 0, transparent 60%),
+                radial-gradient(circle at 35% 80%, #d7e1cf 0, transparent 60%);
+            mix-blend-mode: multiply;
+            z-index: -1;
+        }
+
+        .shell {
+            width: 100%;
+            max-width: 480px;
+        }
+
+        .card {
+        
+            overflow: hidden;
+            border: 1px solid rgba(196, 155, 79, 0.45);
+          
+            background: linear-gradient(145deg, #ffffff 0, #f5f7f1 40%, #edf2ea 100%);
+        }
+
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+            background:#23422f;
+            border-bottom: 1px solid rgba(196, 155, 79, 0.55);
+            color: #fdfdfd;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge-flag {
+            width: 90px;
+            height: 90px;
+            border: 2px solid var(--army-accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at 30% 30%, #36543e 0, #182c20 80%);
+            box-shadow: 0 0 14px rgba(0, 0, 0, 0.55);
+            overflow: hidden;
+        }
+
+        .badge-flag img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .brand-text-main {
+            font-size: 14px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #fbeecf;
+        }
+
+        .brand-text-sub {
+            font-size: 10px;
+            color: #dce4d7;
+            margin-top: 2px;
+        }
+
+        .top-link-home {
+            font-size: 11px;
+            text-decoration: none;
+            color: #fbeecf;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            padding: 6px 10px;
+            border: 1px solid rgba(251, 238, 207, 0.8);
+            background: #fbeecf;
+            color: #1f2b1f;
+        }
+
+        .top-link-home:hover {
+            background: #fff5dd;
+        }
+
+        .body {
+            padding: 20px 18px 18px;
+        }
+
+        .title {
+            font-size: 18px;
+            margin: 0 0 4px;
+            color: #182218;
+        }
+
+        .title span {
+            color: var(--army-green);
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 18px;
+        }
+
+        .shield-strip {
+            font-size: 10px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #23422f;
+            padding: 6px 10px;
+            border: 1px solid rgba(196, 155, 79, 0.6);
+            background: #f5f7f1;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+
+        .shield-dot {
+            width: 7px;
+            height: 7px;
+            background: #4ade80;
+            box-shadow: 0 0 4px rgba(74, 222, 128, 0.8);
+        }
+
+        form {
+            margin-top: 6px;
+        }
+
+        .field-row {
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            margin-bottom: 4px;
+            color: #283128;
+        }
+
+        input[type="text"],
+        input[type="email"] {
+            width: 100%;
+            padding: 9px 10px;
+            border: 1px solid rgba(150, 165, 145, 0.9);
+            background: #ffffff;
+            color: var(--text-light);
+            font-size: 13px;
+            outline: none;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus {
+            border-color: var(--army-accent);
+            box-shadow: 0 0 0 1px rgba(196, 155, 79, 0.7);
+            background-color: #f9fbf6;
+        }
+
+        .errors {
+            margin-top: 4px;
+            font-size: 11px;
+            color: var(--danger);
+        }
+
+        .captcha-wrapper {
+            margin-top: 4px;
+        }
+
+        .captcha-image {
+            padding: 6px;
+            background: #f4f6f1;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid rgba(150, 165, 145, 0.8);
+        }
+
+        .captcha-image img {
+            height: 72px;
+            width: auto;
+            display: block;
+        }
+
+        .captcha-image input[type="text"] {
+            width: 120px;
+            padding: 7px 8px;
+            font-size: 12px;
+            border: 1px solid rgba(196, 155, 79, 0.7);
+            background: #ffffff;
+            color: var(--text-light);
+        }
+
+        .captcha-image input[type="text"]:focus {
+            border-color: var(--army-accent);
+            box-shadow: 0 0 0 1px rgba(196, 155, 79, 0.7);
+        }
+
+        .captcha-note {
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        .actions-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 14px;
+        }
+
+        .btn-login {
+            border: none;
+            padding: 9px 20px;
+            font-size: 12px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            cursor: pointer;
+            color: #ffffff;
+            background: linear-gradient(135deg, var(--accent-red), var(--army-accent));
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+        }
+
+        .btn-login:hover {
+            filter: brightness(1.05);
+            transform: translateY(-1px);
+        }
+
+        .link-small {
+            font-size: 11px;
+            color: var(--muted);
+            text-decoration: none;
+        }
+
+        .link-small span {
+            color: var(--army-green);
+        }
+
+        .link-small:hover span {
+            text-decoration: underline;
+        }
+
+        .footer-note {
+            margin-top: 14px;
+            font-size: 10px;
+            color: #6d776a;
+        }
+    </style>
+</head>
+<body>
+<div class="camouflage"></div>
+
+<div class="shell">
+    <div class="card">
+        <div class="top-bar">
+            <div class="brand">
+                <div class="badge-flag">
+                    <img src="{% static 'img/ncc_logo.png' %}" alt="Portal Logo">
+                </div>
+                <div>
+                    <div class="brand-text-main">Candidate Login</div>
+                    <div class="brand-text-sub">NCC Veteran Recruitment Portal</div>
+                </div>
+            </div>
+            <a href="{% url 'home' %}" class="top-link-home">Back to Home</a>
+        </div>
+
+        <div class="body">
+            <div class="shield-strip">
+                <div class="shield-dot"></div>
+                VERIFIED ACCESS · VETERAN CANDIDATES
+            </div>
+
+            <h1 class="title">
+                Welcome back, <span>Veteran</span>.
+            </h1>
+            <p class="subtitle">
+                Use your registered email, phone number and the OTP sent via official channels.
+                For this demo environment, please use <strong>OTP = 1234</strong>.
+            </p>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <div class="field-row">
+                    <label for="{{ form.email.id_for_label }}">Email</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <div class="errors">{{ form.email.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="field-row">
+                    <label for="{{ form.phone.id_for_label }}">Phone Number</label>
+                    {{ form.phone }}
+                    {% if form.phone.errors %}
+                        <div class="errors">{{ form.phone.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="field-row">
+                    <label for="{{ form.otp.id_for_label }}">One-Time Password (OTP)</label>
+                    {{ form.otp }}
+                    {% if form.otp.errors %}
+                        <div class="errors">{{ form.otp.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="field-row">
+                    <label for="{{ form.captcha.id_for_label }}">Security Check</label>
+                    <div class="captcha-wrapper">
+                        <div class="captcha-image">
+                            {{ form.captcha }}
+                        </div>
+                        <div class="captcha-note">
+                            Please enter the characters shown in the image to confirm you are a genuine user.
+                        </div>
+                    </div>
+                    {% if form.captcha.errors %}
+                        <div class="errors">{{ form.captcha.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="actions-row">
+                    <button type="submit" class="btn-login">
+                        Login
+                    </button>
+                    <a href="{% url 'register' %}" class="link-small">
+                        New user? <span>Register here</span>
+                    </a>
+                </div>
+
+                <div class="footer-note">
+                    This is a pilot environment. Actual OTP delivery will be configured on secure
+                    infrastructure as per policy.
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

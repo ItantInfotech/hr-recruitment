@@ -148,8 +148,14 @@ class Vacancy(models.Model):
         related_name="vacancies",
     )
 
-    sanctioned_strength = models.PositiveIntegerField(default=1, help_text="Total sanctioned posts for this vacancy type at this organization.")
-    current_hired = models.PositiveIntegerField(default=0, help_text="Number of veterans already hired here.")
+    sanctioned_strength = models.PositiveIntegerField(
+        default=1,
+        help_text="Total sanctioned posts for this vacancy type at this organization.",
+    )
+    current_hired = models.PositiveIntegerField(
+        default=0,
+        help_text="Number of veterans already hired here.",
+    )
 
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="DRAFT")
     opening_date = models.DateField(null=True, blank=True)
@@ -214,3 +220,19 @@ class Application(models.Model):
 
     def __str__(self):
         return f"{self.veteran} -> {self.vacancy} ({self.status})"
+
+
+class Registration(models.Model):
+    """
+    Simple public registration record.
+    Later we can link this to Veteran or User models.
+    """
+    full_name = models.CharField(max_length=255)
+    email = models.EmailField(unique=True)
+    phone = models.CharField(max_length=20)
+    is_email_verified = models.BooleanField(default=False)
+    is_phone_verified = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.full_name} ({self.email})"

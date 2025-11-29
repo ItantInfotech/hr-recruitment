@@ -1,0 +1,16 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Candidate Dashboard – NCC Veteran Recruitment Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body style="background:#050806;color:#f5f5f5;font-family:system-ui;padding:24px;">
+    <h2>Candidate Dashboard</h2>
+    <p>You are logged in as: <strong>{{ candidate_email }}</strong> ({{ candidate_phone }})</p>
+    <p>Next step: we can add links here for “Complete Veteran Profile”, “View Open Vacancies”, etc.</p>
+
+    <p><a href="{% url 'home' %}" style="color:#c7a462;">Back to Home</a></p>
+</body>
+</html>

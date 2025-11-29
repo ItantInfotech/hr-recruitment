@@ -42,6 +42,7 @@ INSTALLED_APPS = [
 
     # Your app
     'recruitment',
+    'captcha',
 ]
 
 MIDDLEWARE = [
@@ -129,13 +130,13 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'  # where 'collectstatic' will put files in production
 
 # For local dev you can also serve additional static dirs:
-# STATICFILES_DIRS = [
-#     BASE_DIR / "static",
-# ]
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
 
 # Media files (for resumes, etc.)
 MEDIA_URL = '/media/'
