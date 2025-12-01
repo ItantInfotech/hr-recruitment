@@ -15,6 +15,8 @@ urlpatterns = [
 
     # Your recruitment app URLs
     path("", include("recruitment.urls")),
+
+    path('', include('profiles.urls', namespace='profiles')),
 ]
 
 # Serve media files in development

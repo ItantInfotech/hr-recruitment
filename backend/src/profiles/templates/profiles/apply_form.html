@@ -1,0 +1,846 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Premium Job Application Wizard</title>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: "Poppins", sans-serif;
+            background: #eef3ff url("https://as1.ftcdn.net/v2/jpg/06/17/68/40/1000_F_617684058_AtBNFTFkvLRDtWx1o9CKKKVd4V6iIRQ6.jpg") no-repeat center/cover;
+            padding: 0;
+            margin: 0;
+        }
+
+        .wrapper {
+            width: 95%;
+            max-width: 900px;
+            margin: 40px auto;
+            background: rgba(255,255,255,0.95);
+            padding: 40px;
+            border-radius: 18px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        }
+
+        h2 {
+            text-align: center;
+            font-weight: 600;
+            color: #1d2f6f;
+        }
+
+        .progress-container {
+            display: flex;
+            justify-content: space-between;
+            margin: 30px 0;
+        }
+
+        .progress-step {
+            width: 23%;
+            padding: 10px;
+            background: #d4ddff;
+            text-align: center;
+            border-radius: 10px;
+            font-size: 13px;
+            transition: 0.3s;
+            color: #1d2f6f;
+            font-weight: 600;
+        }
+
+        .progress-step.active {
+            background: #3e63dd;
+            color: #fff;
+            transform: scale(1.05);
+        }
+
+        .step { display: none; }
+        .step.active { display: block; animation: fadeIn 0.4s ease; }
+
+        @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
+
+        label { margin-top: 15px; font-weight: 600; display: block; }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #c9d4f7;
+            margin-top: 5px;
+            background: #f9fbff;
+            font-size: 14px;
+        }
+
+        textarea { height: 90px; }
+        .row { display:flex; gap:20px; }
+        .col { flex:1; }
+
+        .btn-row { margin-top:25px; display:flex; justify-content:space-between; }
+        .btn {
+            padding:12px 25px;
+            border:none;
+            border-radius:8px;
+            cursor:pointer;
+            font-size:15px;
+            font-weight:600;
+        }
+
+        .btn-next { background:#3e63dd; color:white; }
+        .btn-next:hover { background:#274dc4; }
+
+        .btn-prev { background:#d4d9e8; color:#2b3858; }
+        .btn-submit { background:#2e8b57; color:white; }
+        .btn-submit:hover { background:#1f6a40; }
+        
+        /* New styles for enhanced sections */
+        .section-title {
+            font-size: 18px;
+            color: #1d2f6f;
+            margin-top: 25px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #d4ddff;
+        }
+        
+        .add-btn {
+            background: #2e8b57;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        .remove-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        .education-entry, .experience-entry {
+            background: #f9fbff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #d4ddff;
+        }
+        
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .entry-title {
+            font-weight: 600;
+            color: #1d2f6f;
+        }
+    </style>
+
+<script>
+let currentStep = 0;
+let educationCount = 1;
+let experienceCount = 1;
+
+function showStep(step) {
+    let steps = document.querySelectorAll(".step");
+    let progress = document.querySelectorAll(".progress-step");
+
+    steps.forEach(s => s.classList.remove("active"));
+    progress.forEach(p => p.classList.remove("active"));
+
+    steps[step].classList.add("active");
+    progress[step].classList.add("active");
+
+    currentStep = step;
+}
+
+// FIXED: Updated nextStep function to prevent going beyond last step
+function nextStep() {
+    let steps = document.querySelectorAll(".step");
+    if (currentStep < steps.length - 1) {
+        showStep(currentStep + 1);
+    }
+}
+
+function prevStep() { 
+    if (currentStep > 0) {
+        showStep(currentStep - 1);
+    }
+}
+
+/* -------------------------------
+   AUTO UPDATE STATE → CITY
+-------------------------------- */
+const cityData = {
+    "Uttar Pradesh": ["Lucknow","Kanpur","Varanasi","Noida","Ghaziabad","Agra","Meerut","Prayagraj","Bareilly","Aligarh","Moradabad","Gorakhpur","Saharanpur","Jhansi","Firozabad","Ayodhya","Mathura","Sitapur","Etawah","Rampur"],
+    "Bihar": ["Patna","Gaya","Bhagalpur","Muzaffarpur","Purnia","Darbhanga","Arrah","Begusarai","Katihar","Munger","Chhapra","Bettiah","Sasaram","Hajipur","Siwan","Motihari"],
+    "Maharashtra": ["Mumbai","Pune","Nagpur","Nashik","Thane","Aurangabad","Solapur","Kolhapur","Amravati","Nanded","Ahmednagar","Sangli","Satara","Jalgaon","Latur"],
+    "Madhya Pradesh": ["Bhopal","Indore","Gwalior","Jabalpur","Ujjain","Sagar","Ratlam","Rewa","Dewas","Satna","Chhindwara","Morena"],
+    "Gujarat": ["Ahmedabad","Surat","Vadodara","Rajkot","Bhavnagar","Jamnagar","Junagadh","Gandhinagar","Anand","Navsari","Morbi"],
+    "Rajasthan": ["Jaipur","Jodhpur","Kota","Udaipur","Ajmer","Bikaner","Alwar","Bhilwara","Sikar","Pali","Tonk"],
+    "Karnataka": ["Bengaluru","Mysuru","Mangaluru","Hubballi","Belagavi","Ballari","Kalaburagi","Davangere","Shivamogga","Tumakuru"],
+    "Tamil Nadu": ["Chennai","Coimbatore","Madurai","Salem","Tiruchirappalli","Tirunelveli","Erode","Vellore","Thoothukudi","Dindigul","Karur"],
+    "Delhi": ["New Delhi","Dwarka","Rohini","Saket","Karol Bagh","Lajpat Nagar","Vasant Kunj","Janakpuri"],
+    "West Bengal": ["Kolkata","Howrah","Durgapur","Asansol","Siliguri","Kharagpur","Haldia","Bardhaman","Jalpaiguri"],
+    "Other": []
+};
+
+function updateCities(selectId, cityId) {
+    const state = document.getElementById(selectId).value;
+    const cityDropdown = document.getElementById(cityId);
+
+    cityDropdown.innerHTML = '<option>Select City</option>';
+
+    if (cityData[state]) {
+        cityData[state].forEach(c => {
+            let opt = document.createElement("option");
+            opt.value = c;
+            opt.textContent = c;
+            cityDropdown.appendChild(opt);
+        });
+    }
+
+    let otherOpt = document.createElement("option");
+    otherOpt.value = "Other";
+    otherOpt.textContent = "Other";
+    cityDropdown.appendChild(otherOpt);
+}
+
+function checkOtherCity(cityId, inputId) {
+    let city = document.getElementById(cityId).value;
+    let input = document.getElementById(inputId);
+    input.style.display = city === "Other" ? "block" : "none";
+}
+
+/* -------------------------------
+   SEARCHABLE DROPDOWNS
+-------------------------------- */
+function makeSearchable(selectId) {
+    const select = document.getElementById(selectId);
+    select.setAttribute("size", 1);
+    select.addEventListener("click", () => select.size = 6);
+    select.addEventListener("blur", () => select.size = 1);
+    select.addEventListener("change", () => select.size = 1);
+}
+
+/* -------------------------------
+   PIN AUTO-DETECTION (MOCK)
+-------------------------------- */
+function autoDetectPIN(pinId, cityId) {
+    let pin = document.getElementById(pinId).value;
+
+    const map = {
+        "226001": { city: "Lucknow" },
+        "110001": { city: "Delhi" },
+        "400001": { city: "Mumbai" }
+    };
+
+    if (map[pin]) {
+        document.getElementById(cityId).value = map[pin].city;
+    }
+}
+
+/* -------------------------------
+   SAME AS PERMANENT ADDRESS
+-------------------------------- */
+function copyPermanentAddress() {
+    let checked = document.getElementById("same_as_perm").checked;
+
+    let perm1 = document.getElementById("Parmanent_Address_Line1");
+    let perm2 = document.getElementById("Parmanent_Address_Line2");
+    let permState = document.getElementById("state");
+    let permCity = document.getElementById("city");
+    let permPin = document.getElementById("pin");
+
+    let curr1 = document.getElementById("Current_Address_Line1");
+    let curr2 = document.getElementById("Current_Address_Line2");
+    let currState = document.getElementById("state_current");
+    let currCity = document.getElementById("city_current");
+    let currPin = document.getElementById("pin_current");
+
+    if (checked) {
+        curr1.value = perm1.value;
+        curr2.value = perm2.value;
+        currState.value = permState.value;
+
+        updateCities("state_current", "city_current");
+
+        currCity.value = permCity.value;
+        currPin.value = permPin.value;
+
+        curr1.readOnly = true;
+        curr2.readOnly = true;
+        currState.disabled = true;
+        currCity.disabled = true;
+        currPin.readOnly = true;
+
+    } else {
+
+        curr1.readOnly = false;
+        curr2.readOnly = false;
+        currState.disabled = false;
+        currCity.disabled = false;
+        currPin.readOnly = false;
+    }
+}
+
+/* -------------------------------
+   ADD/REMOVE EDUCATION ENTRIES
+-------------------------------- */
+function addEducationEntry() {
+    educationCount++;
+    const container = document.getElementById('education-container');
+    
+    const newEntry = document.createElement('div');
+    newEntry.className = 'education-entry';
+    newEntry.id = `education-entry-${educationCount}`;
+    
+    newEntry.innerHTML = `
+        <div class="entry-header">
+            <div class="entry-title">Education Entry #${educationCount}</div>
+            <button type="button" class="remove-btn" onclick="removeEducationEntry(${educationCount})">Remove</button>
+        </div>
+        
+        <label>Degree</label>
+        <select name="degree[]" required>
+            <option>Select</option>
+            <option>High School</option>
+            <option>Intermediate</option>
+            <option>Diploma</option>
+            <option>Bachelor's</option>
+            <option>Master's</option>
+            <option>PhD</option>
+        </select>
+
+        <label>University/Institution</label>
+        <input type="text" name="university[]" required>
+
+        <div class="row">
+            <div class="col">
+                <label>From</label>
+                <input type="date" name="edu_from[]" required>
+            </div>
+            <div class="col">
+                <label>To</label>
+                <input type="date" name="edu_to[]" required>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <label>Grade/Percentage</label>
+                <input type="text" name="percentage[]" required>
+            </div>
+            <div class="col">
+                <label>Grading Scale</label>
+                <select name="grading_scale[]">
+                    <option>Percentage</option>
+                    <option>CGPA</option>
+                </select>
+            </div>
+        </div>
+
+        <label>Certificate Copy</label>
+        <input type="file" name="education_certificate[]" accept=".pdf,.jpg,.jpeg,.png">
+    `;
+    
+    container.appendChild(newEntry);
+}
+
+function removeEducationEntry(id) {
+    if (educationCount > 1) {
+        const entry = document.getElementById(`education-entry-${id}`);
+        entry.remove();
+        educationCount--;
+        
+        // Update entry numbers
+        const entries = document.querySelectorAll('.education-entry');
+        entries.forEach((entry, index) => {
+            const header = entry.querySelector('.entry-title');
+            header.textContent = `Education Entry #${index + 1}`;
+        });
+    }
+}
+
+/* -------------------------------
+   ADD/REMOVE EXPERIENCE ENTRIES
+-------------------------------- */
+function addExperienceEntry() {
+    experienceCount++;
+    const container = document.getElementById('experience-container');
+    
+    const newEntry = document.createElement('div');
+    newEntry.className = 'experience-entry';
+    newEntry.id = `experience-entry-${experienceCount}`;
+    
+    newEntry.innerHTML = `
+        <div class="entry-header">
+            <div class="entry-title">Experience Entry #${experienceCount}</div>
+            <button type="button" class="remove-btn" onclick="removeExperienceEntry(${experienceCount})">Remove</button>
+        </div>
+        
+        <div class="row">
+            <div class="col">
+                <label>Experience From</label>
+                <input type="date" name="exp_from[]" required>
+            </div>
+            <div class="col">
+                <label>Experience To</label>
+                <input type="date" name="exp_to[]" required>
+            </div>
+        </div>
+
+        <label>Organization</label>
+        <input type="text" name="organization[]" required>
+
+        <label>Designation</label>
+        <input type="text" name="designation[]" required>
+
+        <label>Responsibilities</label>
+        <textarea name="responsibilities[]" required></textarea>
+
+        <label>Experience Proof Document</label>
+        <input type="file" name="exp_proof[]" accept=".pdf,.jpg,.jpeg,.png">
+
+        <label>Current/Last Monthly Fee</label>
+        <input type="text" name="current_salary[]" required>
+    `;
+    
+    container.appendChild(newEntry);
+}
+
+function removeExperienceEntry(id) {
+    if (experienceCount > 1) {
+        const entry = document.getElementById(`experience-entry-${id}`);
+        entry.remove();
+        experienceCount--;
+        
+        // Update entry numbers
+        const entries = document.querySelectorAll('.experience-entry');
+        entries.forEach((entry, index) => {
+            const header = entry.querySelector('.entry-title');
+            header.textContent = `Experience Entry #${index + 1}`;
+        });
+    }
+}
+
+window.onload = function() {
+    showStep(0);
+    makeSearchable("state");
+    makeSearchable("city");
+    makeSearchable("state_current");
+    makeSearchable("city_current");
+    makeSearchable("computer_proficiency");
+};
+</script>
+
+</head>
+<body>
+
+<div class="wrapper">
+    <h2>USER PROFILE</h2>
+
+    <div class="progress-container">
+        <div class="progress-step active">Personal</div>
+        <div class="progress-step">Education</div>
+        <div class="progress-step">Experience</div>
+        <div class="progress-step">Documents</div>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- STEP 1 -->
+        <div class="step active">
+
+            <div class="row">
+                <div class="col">
+                    <label>Salutation</label>
+                    <select name="salutation" required>
+                        <option>Select</option>
+                        <option>Mr.</option>
+                        <option>Ms.</option>
+                        <option>Mrs.</option>
+                        <option>Dr.</option>
+                        <option>Prof.</option>
+                    </select>
+                </div>
+
+                <div class="col">
+                    <label>First Name</label>
+                    <input type="text" name="first_name" required>
+                </div>
+
+                <div class="col">
+                    <label>Middle Name</label>
+                    <input type="text" name="middle_name" required>
+                </div>
+            </div>
+
+            <label>Last Name</label>
+            <input type="text" name="last_name" required>
+
+            <label>Father’s / Husband’s Name</label>
+            <input type="text" name="father_husband_name" required>
+
+            <div class="row">
+                <div class="col">
+                    <label>Date of Birth</label>
+                    <input type="date" name="date_of_birth" required>
+                </div>
+
+                <div class="col">
+                    <label>Gender</label>
+                    <select name="gender" required>
+                        <option>Select</option>
+                        <option>Male</option>
+                        <option>Female</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+
+                <div class="col">
+                    <label>Blood Group</label>
+                    <select name="blood_group" required>
+                        <option>Select</option>
+                        <option>A+</option>
+                        <option>A-</option>
+                        <option>B+</option>
+                        <option>B-</option>
+                        <option>O+</option>
+                        <option>O-</option>
+                        <option>AB+</option>
+                        <option>AB-</option>
+                    </select>
+                </div>
+            </div>
+
+            <label>Marital Status</label>
+            <select name="marital_status" required>
+                <option>Select</option>
+                <option>Single</option>
+                <option>Married</option>
+                <option>Divorced</option>
+                <option>Widowed</option>
+            </select>
+
+            <label>Religion</label>
+            <select name="religion" required>
+                <option>Select</option>
+                <option>Hindu</option>
+                <option>Muslim</option>
+                        <option>Sikh</option>
+                        <option>Christian</option>
+                        <option>Jain</option>
+                        <option>Buddhist</option>
+                        <option>Other</option>
+                    </select>
+
+                    <label>Identity Number(Aadhaar/PAN/Voter ID/Passport/Driving License)</label>
+                    <input type="text" name="identity_number" required>
+
+                    <!-- PERMANENT ADDRESS SPLIT -->
+                    <label>Permanent Address - Line 1</label>
+                    <input type="text" name="Parmanent_Address_Line1" id="Parmanent_Address_Line1" required>
+
+                    <label>Permanent Address - Line 2</label>
+                    <input type="text" name="Parmanent_Address_Line2" id="Parmanent_Address_Line2">
+
+                    <div class="row">
+                        <div class="col">
+                            <label>State</label>
+                            <select name="state" id="state" onchange="updateCities('state','city')" required>
+                                <option>Select State</option>
+                                <option>Uttar Pradesh</option>
+                                <option>Bihar</option>
+                                <option>Maharashtra</option>
+                                <option>Madhya Pradesh</option>
+                                <option>Gujarat</option>
+                                <option>Rajasthan</option>
+                                <option>Karnataka</option>
+                                <option>Tamil Nadu</option>
+                                <option>Delhi</option>
+                                <option>West Bengal</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+
+                        <div class="col">
+                            <label>City</label>
+                            <select name="city" id="city" onchange="checkOtherCity('city','other_city_input')" required>
+                                <option>Select City</option>
+                            </select>
+                            <input type="text" id="other_city_input" name="other_city" placeholder="Enter City" style="display:none; margin-top:10px;" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col">
+                            <label>PIN</label>
+                            
+                            <!-- UPDATED PIN FIELD -->
+                            <input type="text" id="pin" name="pin" maxlength="6" pattern="\d{6}"
+                            oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,6)"
+                            onkeyup="autoDetectPIN('pin','city')" required>
+
+                        </div>
+                    </div>
+
+                    <!-- UPDATED CHECKBOX WITH PROPER ALIGNMENT -->
+                    <div style="margin: 20px 0 30px 0; display: flex; align-items: center;">
+                        <input type="checkbox" id="same_as_perm" onclick="copyPermanentAddress()" 
+                               style="margin-right: 10px; width: auto;">
+                        <label for="same_as_perm" style="margin: 0; display: inline; font-weight: normal;">
+                            Same as Permanent Address
+                        </label>
+                    </div>
+
+                    <!-- CURRENT ADDRESS SPLIT -->
+                    <label>Current Address - Line 1</label>
+                    <input type="text" name="Current_Address_Line1" id="Current_Address_Line1" required>
+
+                    <label>Current Address - Line 2</label>
+                    <input type="text" name="Current_Address_Line2" id="Current_Address_Line2">
+
+                    <div class="row">
+                        <div class="col">
+                            <label>State</label>
+                            <select name="state_current" id="state_current" onchange="updateCities('state_current','city_current')" required>
+                                <option>Select State</option>
+                                <option>Uttar Pradesh</option>
+                                <option>Bihar</option>
+                                <option>Maharashtra</option>
+                                <option>Madhya Pradesh</option>
+                                <option>Gujarat</option>
+                                <option>Rajasthan</option>
+                                <option>Karnataka</option>
+                                <option>Tamil Nadu</option>
+                                <option>Delhi</option>
+                                <option>West Bengal</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+
+                        <div class="col">
+                            <label>City</label>
+                            <select name="city_current" id="city_current" onchange="checkOtherCity('city_current','other_city_input_current')" required>
+                                <option>Select City</option>
+                            </select>
+                            <input type="text" id="other_city_input_current" name="other_city_current" placeholder="Enter City" style="display:none; margin-top:10px;" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col">
+                            <label>PIN</label>
+
+                            <!-- UPDATED CURRENT PIN FIELD -->
+                            <input type="text" id="pin_current" name="pin_current" maxlength="6" pattern="\d{6}"
+                            oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,6)"
+                            onkeyup="autoDetectPIN('pin_current','city_current')" required>
+
+                        </div>
+
+                        <div class="col">
+                            <label>Phone</label>
+
+                            <!-- UPDATED PHONE FIELD -->
+                            <input type="tel" name="phone" maxlength="10" pattern="\d{10}"
+                            oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)" required>
+
+                        </div>
+                    </div>
+
+                    <label>Email ID</label>
+                    <input type="email" name="email" required>
+
+                    <label>Languages Known</label>
+                    <select name="languages_known" required>
+                        <option>Select</option>
+                        <option>Hindi</option>
+                        <option>English</option>
+                        <option>Other</option>
+                    </select>
+
+                    <label>Computer Proficiency</label>
+                    <select name="computer_proficiency" id="computer_proficiency" required>
+                        <option>Select</option>
+                        <option>Beginner</option>
+                        <option>Intermediate</option>
+                        <option>Advanced</option>
+                        <option>Expert</option>
+                        <option>Other</option>
+                    </select>
+
+                    <div class="btn-row">
+                        <span></span>
+                        <button type="button" class="btn btn-next" onclick="nextStep()">Next →</button>
+                    </div>
+                </div>
+
+                <!-- STEP 2 - ENHANCED EDUCATION SECTION -->
+                <div class="step">
+                    <div class="section-title">Education Details</div>
+                    <p>Add all your educational qualifications starting from the highest degree.</p>
+                    
+                    <div id="education-container">
+                        <div class="education-entry" id="education-entry-1">
+                            <div class="entry-header">
+                                <div class="entry-title">Education Entry #1</div>
+                            </div>
+                            
+                            <label>Degree</label>
+                            <select name="degree[]" required>
+                                <option>Select</option>
+                                <option>High School</option>
+                                <option>Intermediate</option>
+                                <option>Diploma</option>
+                                <option>Bachelor's</option>
+                                <option>Master's</option>
+                                <option>PhD</option>
+                            </select>
+
+                            <label>University/Institution</label>
+                            <input type="text" name="university[]" required>
+
+                            <div class="row">
+                                <div class="col">
+                                    <label>From</label>
+                                    <input type="date" name="edu_from[]" required>
+                                </div>
+                                <div class="col">
+                                    <label>To</label>
+                                    <input type="date" name="edu_to[]" required>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col">
+                                    <label>Grade/Percentage</label>
+                                    <input type="text" name="percentage[]" required>
+                                </div>
+                                <div class="col">
+                                    <label>Grading Scale</label>
+                                    <select name="grading_scale[]">
+                                        <option>Percentage</option>
+                                        <option>CGPA</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <label>Certificate Copy</label>
+                            <input type="file" name="education_certificate[]" accept=".pdf,.jpg,.jpeg,.png">
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="add-btn" onclick="addEducationEntry()">+ Add Another Education</button>
+
+                    <div class="btn-row">
+                        <button type="button" class="btn btn-prev" onclick="prevStep()">← Back</button>
+                        <button type="button" class="btn btn-next" onclick="nextStep()">Next →</button>
+                    </div>
+                </div>
+
+                <!-- STEP 3 - ENHANCED EXPERIENCE SECTION -->
+                <div class="step">
+                    <div class="section-title">Work Experience</div>
+                    <p>Add your work experience in chronological order, starting with your current or most recent position.</p>
+                    
+                    <div id="experience-container">
+                        <div class="experience-entry" id="experience-entry-1">
+                            <div class="entry-header">
+                                <div class="entry-title">Experience Entry #1</div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col">
+                                    <label>Experience From</label>
+                                    <input type="date" name="exp_from[]" required>
+                                </div>
+                                <div class="col">
+                                    <label>Experience To</label>
+                                    <input type="date" name="exp_to[]" required>
+                                </div>
+                            </div>
+
+                            <label>Organization</label>
+                            <input type="text" name="organization[]" required>
+
+                            <label>Designation</label>
+                            <input type="text" name="designation[]" required>
+
+                            <label>Responsibilities</label>
+                            <textarea name="responsibilities[]" required></textarea>
+
+                            <label>Experience Proof Document</label>
+                            <input type="file" name="exp_proof[]" accept=".pdf,.jpg,.jpeg,.png">
+
+                            <label>Current/Last Monthly Fee</label>
+                            <input type="text" name="current_salary[]" required>
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="add-btn" onclick="addExperienceEntry()">+ Add Another Experience</button>
+                    
+                    <div class="row" style="margin-top: 20px;">
+                        <div class="col">
+                            <label>Relevant Years of Experience</label>
+                            <input type="text" name="relevant_years_of_experience" required>
+                        </div>
+                        <div class="col">
+                            <label>Notice Period</label>
+                            <input type="text" name="notice_period" required>
+                        </div>
+                    </div>
+
+                    <div class="btn-row">
+                        <button type="button" class="btn btn-prev" onclick="prevStep()">← Back</button>
+                        <button type="button" class="btn btn-next" onclick="nextStep()">Next →</button>
+                    </div>
+                </div>
+
+                <!-- STEP 4 - DOCUMENTS + SUBMIT -->
+                <div class="step">
+                    <div class="section-title">Upload Documents</div>
+
+                    <label>Upload Photograph</label>
+                    <input type="file" name="photo" accept=".jpg,.jpeg,.png" required>
+
+                    <label>Upload Signature</label>
+                    <input type="file" name="signature" accept=".jpg,.jpeg,.png" required>
+
+                    <label>Upload Resume</label>
+                    <input type="file" name="resume" accept=".pdf" required>
+
+                    <div class="section-title" style="margin-top: 30px;">Additional Documents</div>
+
+                    <label>Age Proof</label>
+                    <input type="file" name="age_proof" accept=".pdf,.jpg,.jpeg,.png" required>
+
+                    <label>Address Proof</label>
+                    <input type="file" name="address_proof" accept=".pdf,.jpg,.jpeg,.png" required>
+
+                    <label>Last Salary Proof</label>
+                    <input type="file" name="last_salary_proof" accept=".pdf,.jpg,.jpeg,.png" required>
+
+                    <div class="btn-row">
+                        <button type="button" class="btn btn-prev" onclick="prevStep()">← Previous</button>
+                        <button type="submit" class="btn btn-submit">SUBMIT</button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+
+    </body>
+    </html>

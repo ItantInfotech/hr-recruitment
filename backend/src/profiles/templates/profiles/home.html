@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Welcome to Job Application Portal</h2>
+    <a href="{% url 'profiles:apply_job' %}" class="btn btn-primary mt-3">Apply for a Job</a>
+</div>
+{% endblock %}
